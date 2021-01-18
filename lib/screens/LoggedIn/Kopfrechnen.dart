@@ -1,4 +1,4 @@
-import 'package:HelloWorld/home.dart';
+import 'package:HelloWorld/screens/LoggedIn/home.dart';
 
 import 'package:flutter/material.dart';
 import 'Generator.dart';
