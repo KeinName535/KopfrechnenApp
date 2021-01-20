@@ -6,12 +6,16 @@ import 'package:HelloWorld/services/auth.dart';
 import 'package:flutter/material.dart';
 
 class SignIn extends StatefulWidget {
+  final Function changePage;
+  final Function changeanon;
+  SignIn({this.changePage, this.changeanon});
+
   @override
   _SignInState createState() => _SignInState();
 }
 
 class _SignInState extends State<SignIn> {
-  final AuthService _auth = AuthService();
+  //final AuthService _auth = AuthService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,28 +28,26 @@ class _SignInState extends State<SignIn> {
             padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
             child: Column(children: [
               RaisedButton(
-                child: Text('SignInAnonymous'),
-                onPressed: () async {
-                  dynamic result = await _auth.signInAnon();
-                  if (result == null) {
-                    print('error signing in');
-                    print(result);
-                  } else {
-                    print('signedIn');
-                    print(result.uid);
-                  }
+                child: Text('SignInAnon'),
+                onPressed: () {
+                  widget.changePage(0);
+                  widget.changeanon();
                 },
               ),
               RaisedButton(
                 child: Text('SignInViaE-Mail'),
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Login(),
-                      ));
+                  widget.changePage(1);
+                  widget.changeanon();
                 },
               ),
+              RaisedButton(
+                child: Text('RegisterViaE-Mail'),
+                onPressed: () {
+                  widget.changePage(5);
+                  widget.changeanon();
+                },
+              )
             ])));
   }
 }
