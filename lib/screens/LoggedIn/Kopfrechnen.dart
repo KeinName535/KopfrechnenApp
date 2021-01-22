@@ -1,13 +1,10 @@
 import 'package:HelloWorld/screens/LoggedIn/home.dart';
-
+import 'package:HelloWorld/services/Database.dart';
 import 'package:flutter/material.dart';
 import 'Generator.dart';
 import 'dart:math';
-//import 'constants.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'Database.dart';
+import 'package:HelloWorld/Models/User.dart';
+import 'package:provider/provider.dart';
 
 class Kopfrechnen extends StatefulWidget {
   @override
@@ -30,7 +27,8 @@ class _KopfrechnenState extends State<Kopfrechnen> {
       }
     }
 
-    bool Truegiven = false;
+    bool truegiven = false;
+    bool nonetrue = false;
 
     int Zufallszahl(int z) {
       var randomizer = Random();
@@ -52,12 +50,14 @@ class _KopfrechnenState extends State<Kopfrechnen> {
     }
 
     int checkforTrue() {
-      if (Truegiven == true) {
+      if (truegiven == true) {
         return 4;
       } else {
         var randomizer = Random();
         int z = randomizer.nextInt(3);
         if (z == 1) {
+          //truegiven = true;
+          nonetrue = true;
           return 1;
         } else {
           return 4;
@@ -66,7 +66,7 @@ class _KopfrechnenState extends State<Kopfrechnen> {
     }
 
     int checkforTrueNone() {
-      if (Truegiven == false) {
+      if (nonetrue == false) {
         return 1;
       } else {
         return 4;
@@ -130,7 +130,14 @@ class _KopfrechnenState extends State<Kopfrechnen> {
       });
     }
 
-    void ergebnis(var x) {
+    final user = Provider.of<User>(context);
+    Future compare_score(String highscore) async {
+      if (score > int.parse(highscore)) {
+        DatabaseService(uid: user.uid).updateUserData('John', score.toString());
+      }
+    }
+
+    void ergebnis(var x, String highscore) {
       if (x == 1) {
         showDialog<AlertDialog>(
             context: context,
@@ -141,7 +148,7 @@ class _KopfrechnenState extends State<Kopfrechnen> {
                       children: <Widget>[Text('zum Menü'), Icon(Icons.home)]),
                   onPressed: () {
                     score = testforNull(score) + 1;
-                    //compare_score();
+                    compare_score(highscore);
 
                     Navigator.push(
                         context,
@@ -152,6 +159,7 @@ class _KopfrechnenState extends State<Kopfrechnen> {
                 ),
                 new FlatButton(
                     onPressed: () {
+                      compare_score(highscore);
                       setState(() {
                         score = testforNull(score) + 1;
                         build(context);
@@ -185,7 +193,7 @@ class _KopfrechnenState extends State<Kopfrechnen> {
                       ]),
                       onPressed: () {
                         _decrease_score();
-                        //compare_score();
+                        compare_score(highscore);
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -199,6 +207,7 @@ class _KopfrechnenState extends State<Kopfrechnen> {
                           Icon(Icons.arrow_forward)
                         ]),
                         onPressed: () {
+                          compare_score(highscore);
                           _decrease_score();
                           Navigator.pop(context);
                         })
@@ -207,87 +216,96 @@ class _KopfrechnenState extends State<Kopfrechnen> {
       }
     }
 
-    return Scaffold(
-        appBar: AppBar(
-            title: Row(children: <Widget>[
-              Text('Quiz                                    '),
-              Text('Score:'),
-              Text(testforNull(score).toString())
-            ]),
-            backgroundColor: Colors.lightBlue),
-        body: ListView.builder(
-          itemCount: ((MediaQuery.of(context).size.height) / 100).round(),
-          itemBuilder: (context, i) {
-            if (i == 0) {
-              return Container(
-                  width: 400,
-                  height: 85.7,
-                  //padding: EdgeInsets.symmetric(horizontal: 100, vertical: 50),
-                  decoration: BoxDecoration(
-                      color: Colors.blue,
-                      border: Border.all(color: Colors.black, width: 4)),
-                  child: Center(
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          Text('Was ist ',
-                              style:
-                                  TextStyle(fontSize: 24, color: Colors.black)),
-                          Text(zahl1.toString(),
-                              style:
-                                  TextStyle(fontSize: 24, color: Colors.black)),
-                          Text(Operator,
-                              style:
-                                  TextStyle(fontSize: 24, color: Colors.black)),
-                          Text(zahl2.toString(),
-                              style:
-                                  TextStyle(fontSize: 24, color: Colors.black)),
-                          Text('?',
-                              style:
-                                  TextStyle(fontSize: 24, color: Colors.black))
-                        ]),
-                  ));
-            } else if (i ==
-                (((MediaQuery.of(context).size.height) / 100).round()) - 1) {
-              return Container(
-                width: 400,
-                height: 85.7,
-                //padding: EdgeInsets.symmetric(horizontal: 100, vertical: 50),
-                decoration: BoxDecoration(
-                    color: Colors.blue,
-                    border: Border.all(color: Colors.black, width: 4)),
-                child: Center(
-                    child: RaisedButton(
-                        onPressed: () => ergebnis(checkforTrueNone()),
-                        child: Text('None',
-                            style:
-                                TextStyle(fontSize: 24, color: Colors.black)))),
-              );
-            } else {
-              int Constructor = checkforTrue();
-              int Solution = 0;
-              if (Constructor == 1) {
-                Solution = OpErg(zahl1, zahl2, Operator);
-              } else {
-                Solution = nearErg(zahl1, zahl2, Operator);
-              }
-              return Container(
-                width: 400,
-                height: 85.7,
-                //padding: EdgeInsets.symmetric(horizontal: 100, vertical: 50),
-                decoration: BoxDecoration(
-                    color: Colors.blue,
-                    border: Border.all(color: Colors.black, width: 4)),
-                child: Center(
-                    child: RaisedButton(
-                        onPressed: () => ergebnis(Constructor),
-                        child: Text(Solution.toString(),
-                            style:
-                                TextStyle(fontSize: 24, color: Colors.black)))),
-              );
-            }
-          },
-        ));
+    return StreamBuilder<UserData>(
+        stream: DatabaseService(uid: user.uid).userdata,
+        builder: (context, snapshot) {
+          UserData daten = snapshot.data;
+          return Scaffold(
+              appBar: AppBar(
+                  title: Row(children: <Widget>[
+                    Text('Quiz                                    '),
+                    Text('Score:'),
+                    Text(testforNull(score).toString())
+                  ]),
+                  backgroundColor: Colors.lightBlue),
+              body: ListView.builder(
+                itemCount: ((MediaQuery.of(context).size.height) / 100).round(),
+                itemBuilder: (context, i) {
+                  if (i == 0) {
+                    return Container(
+                        width: 400,
+                        height: 85.7,
+                        //padding: EdgeInsets.symmetric(horizontal: 100, vertical: 50),
+                        decoration: BoxDecoration(
+                            color: Colors.blue,
+                            border: Border.all(color: Colors.black, width: 4)),
+                        child: Center(
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: <Widget>[
+                                Text('Was ist ',
+                                    style: TextStyle(
+                                        fontSize: 24, color: Colors.black)),
+                                Text(zahl1.toString(),
+                                    style: TextStyle(
+                                        fontSize: 24, color: Colors.black)),
+                                Text(Operator,
+                                    style: TextStyle(
+                                        fontSize: 24, color: Colors.black)),
+                                Text(zahl2.toString(),
+                                    style: TextStyle(
+                                        fontSize: 24, color: Colors.black)),
+                                Text('?',
+                                    style: TextStyle(
+                                        fontSize: 24, color: Colors.black))
+                              ]),
+                        ));
+                  } else if (i !=
+                      (((MediaQuery.of(context).size.height) / 100).round()) -
+                          1) {
+                    int Constructor = checkforTrue();
+                    int Solution = 0;
+                    if (Constructor == 1) {
+                      Solution = OpErg(zahl1, zahl2, Operator);
+                      truegiven = true;
+                    } else {
+                      Solution = nearErg(zahl1, zahl2, Operator);
+                    }
+                    return Container(
+                      width: 400,
+                      height: 85.7,
+                      //padding: EdgeInsets.symmetric(horizontal: 100, vertical: 50),
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          border: Border.all(color: Colors.black, width: 4)),
+                      child: Center(
+                          child: RaisedButton(
+                              onPressed: () =>
+                                  ergebnis(Constructor, daten.highscore),
+                              child: Text(Solution.toString(),
+                                  style: TextStyle(
+                                      fontSize: 24, color: Colors.black)))),
+                    );
+                  } else {
+                    return Container(
+                      width: 400,
+                      height: 85.7,
+                      //padding: EdgeInsets.symmetric(horizontal: 100, vertical: 50),
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          border: Border.all(color: Colors.black, width: 4)),
+                      child: Center(
+                          child: RaisedButton(
+                              onPressed: () =>
+                                  ergebnis(checkforTrueNone(), daten.highscore),
+                              child: Text('None',
+                                  style: TextStyle(
+                                      fontSize: 24, color: Colors.black)))),
+                    );
+                  }
+                },
+              ));
+        });
   }
 }
