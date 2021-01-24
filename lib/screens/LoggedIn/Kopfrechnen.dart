@@ -53,11 +53,12 @@ class _KopfrechnenState extends State<Kopfrechnen> {
       if (truegiven == true) {
         return 4;
       } else {
-        var randomizer = Random();
+        var randomizer = new Random();
         int z = randomizer.nextInt(3);
         if (z == 1) {
           //truegiven = true;
           nonetrue = true;
+
           return 1;
         } else {
           return 4;
@@ -139,6 +140,8 @@ class _KopfrechnenState extends State<Kopfrechnen> {
 
     void ergebnis(var x, String highscore) {
       if (x == 1) {
+        _increase_score();
+        compare_score(highscore);
         showDialog<AlertDialog>(
             context: context,
             builder: (BuildContext context) {
@@ -147,9 +150,6 @@ class _KopfrechnenState extends State<Kopfrechnen> {
                   child: Row(
                       children: <Widget>[Text('zum Menü'), Icon(Icons.home)]),
                   onPressed: () {
-                    score = testforNull(score) + 1;
-                    compare_score(highscore);
-
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -159,7 +159,7 @@ class _KopfrechnenState extends State<Kopfrechnen> {
                 ),
                 new FlatButton(
                     onPressed: () {
-                      compare_score(highscore);
+                      //compare_score(highscore);
                       setState(() {
                         score = testforNull(score) + 1;
                         build(context);
@@ -173,6 +173,8 @@ class _KopfrechnenState extends State<Kopfrechnen> {
               ]);
             });
       } else {
+        _decrease_score();
+        compare_score(highscore);
         showDialog<AlertDialog>(
             context: context,
             builder: (BuildContext context) {
@@ -192,8 +194,6 @@ class _KopfrechnenState extends State<Kopfrechnen> {
                         Icon(Icons.home)
                       ]),
                       onPressed: () {
-                        _decrease_score();
-                        compare_score(highscore);
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -207,8 +207,6 @@ class _KopfrechnenState extends State<Kopfrechnen> {
                           Icon(Icons.arrow_forward)
                         ]),
                         onPressed: () {
-                          compare_score(highscore);
-                          _decrease_score();
                           Navigator.pop(context);
                         })
                   ]);
@@ -268,8 +266,7 @@ class _KopfrechnenState extends State<Kopfrechnen> {
                     int Solution = 0;
                     if (Constructor == 1) {
                       Solution = OpErg(zahl1, zahl2, Operator);
-                      truegiven = true;
-                    } else {
+                    } else if (Constructor == 4) {
                       Solution = nearErg(zahl1, zahl2, Operator);
                     }
                     return Container(
